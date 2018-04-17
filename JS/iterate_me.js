@@ -9,7 +9,7 @@ function randomItem(array) {
     return array[randomIndex]
 }
 
-makeChar = () => {
+const makeChar = () => {
     return String.fromCharCode(randomNumber({
         min: 0,
         max: 255,
@@ -19,12 +19,10 @@ makeChar = () => {
 
 const alphabeth = {
     [Symbol.iterator]: () => {
-        let len = 0
         return {
             next: () => {
-                const enoughChars = (Math.random() > 0.8) && (len > 20)
+                const enoughChars = Math.random() > 0.75
                 if (!enoughChars)
-                    len += 1
                     return {
                         value: makeChar(),
                         done: false
@@ -36,8 +34,9 @@ const alphabeth = {
 }
 
 function findNextChar(word, target) {
-    subtarget = target.split('').splice(0, word.length + 1).join('')
+    let subtarget = target.split('').splice(0, word.length + 1).join('')
     do {
+        let spec
         do {
             spec = []
             for (let c of alphabeth) {
@@ -71,7 +70,7 @@ const hello_world = {
 }
 
 console.time('hello')
-result = ''
+let result = ''
 for (let c of hello_world) {
     result = result + c
 }
