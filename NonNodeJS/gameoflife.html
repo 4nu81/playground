@@ -1,9 +1,20 @@
-<div>
-<canvas id="gc" width="800" height="800"></canvas>
-</div>
+<style>
+    span {
+        margin:2px;
+        padding:2px;
+        background:lime;
+        border-radius: 2px;
+        height:50px;
+    }
+</style>
 
-<button id="play" onclick="toggle_run()">Play (Space)</button>
-<button id="step" onclick="step()">Step (Cursor-Right)</button>
-<button id="clear" onclick="clear_plane(true)">clear</button>
-<button id="fill" onclick="clear_plane(false)">random fill</button>
+<div>
+    <canvas id="gc" width="800" height="800"></canvas>
+</div>
+<div>
+    <span id="play" onclick="toggle_run()">Play (Space)</span>
+    <span id="step" onclick="step()">Step (Cursor-Right)</span>
+    <span id="clear" onclick="clear_plane(true)">clear</span>
+    <span id="fill" onclick="clear_plane(false)">random fill</span>
+</div>
 <script src="gameoflife.js"></script>

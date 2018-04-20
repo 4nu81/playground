@@ -1,17 +1,26 @@
-<canvas id="gc" width="400" height="400"></canvas>
+<canvas id="gc" width="400" height="440"></canvas>
 <script>
     window.onload = function() {
         canv = document.getElementById("gc")
         ctx = canv.getContext("2d")
         document.addEventListener("keydown", keyPush)
-        setInterval(game,1000/15)
+        setInterval(game,100)
     }
     xv=yv=0;
     px=py=10;
-    gs=tc=20;
+    gs=20;
+    tc=20;
     ax=ay=15;
     tail=5;
     trail=[];
+
+    function drawBorder(){
+        ctx.fillStyle="orange"
+        ctx.fillRect(0,0,canv.width, 2*gs - 2)
+        ctx.fillStyle="black"
+        ctx.font = "30px Arial"
+        ctx.fillText("Length: " + tail, 20, 30)
+    }
 
     function game() {
         px+=xv;
@@ -30,17 +39,17 @@
         }
         ctx.fillStyle="black";
         ctx.fillRect(0,0,canv.width,canv.height);
-    
+        drawBorder()
         ctx.fillStyle="lime";
         for(var i=0;i<trail.length;i++) {
-            ctx.fillRect(trail[i].x*gs,trail[i].y*gs,gs-2,gs-2);
+            ctx.fillRect(trail[i].x*gs,(trail[i].y + 2 )*gs,gs-2,gs-2);
             if(trail[i].x==px && trail[i].y==py) {
                 tail = 5;
             }
         }
         trail.push({x:px,y:py});
         while(trail.length>tail) {
-        trail.shift();
+            trail.shift();
         }
     
         if(ax==px && ay==py) {
@@ -49,7 +58,7 @@
             ay=Math.floor(Math.random()*tc);
         }
         ctx.fillStyle="red";
-        ctx.fillRect(ax*gs,ay*gs,gs-2,gs-2);
+        ctx.fillRect(ax*gs,(ay+2)*gs,gs-2,gs-2);
     }
 
     function keyPush(evt) {
