@@ -1,0 +1,37 @@
+
+@apiUrl = https://api-test.mms-rcs.de
+@apiVer = API_1_3
+@mandantId = DemoWeb
+@clientId = AP7msqahFUjShwXu
+@login = 100011
+@passwd = 100011
+@bestellerId = DemoWeb7e9b3cff3d0e29664c63748371aea33f
+@kundeId = 5ab9eb216c1531a11e8b4acb
+
+
+# GET Versionen
+GET {{apiUrl}}/versionen
+
+###
+
+# GET Mandant
+GET {{apiUrl}}/{{apiVer}}/mandant/get
+    ?clientId=AP7msqahFUjShwXu
+    &mandantId=DemoWeb
+
+###
+
+# POST Login
+GET {{apiUrl}}/{{apiVer}}/kunde/login
+    ?clientId={{clientId}}
+    &mandantId={{mandantId}}
+    &login={{login}}
+    &passwd={{passwd}}
+
+###
+
+# GET Kunde
+GET {{apiUrl}}/{{apiVer}}/kunde/get
+    ?clientId={{clientId}}
+    &mandantId={{mandantId}}
+    &kundeId={{kundeId}}
