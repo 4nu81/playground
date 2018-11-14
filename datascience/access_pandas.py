@@ -90,8 +90,8 @@ def plot_data(h_vals, d_vals):
     plt.yticks(fontweight='bold')
 
     color = '#AAAAFF'
-    ax1.set_xlabel('date (hrs)')
-    ax1.set_ylabel('count per day')
+    ax1.set_xlabel('date')
+    ax1.set_ylabel('n/d')
     ax1.bar(df2.index, df2['d_count'], color=color, width=1, align='edge', edgecolor='#000099', linewidth=1)
     ax1.tick_params(axis='y', labelcolor=color)
 
@@ -100,7 +100,7 @@ def plot_data(h_vals, d_vals):
     ax2 = ax1.twinx()
 
     color = '#FF0000'
-    ax2.set_ylabel('count per hour')
+    ax2.set_ylabel('n/h')
     ax2.plot(df.index, 'h_count', data=df, color=color, linewidth=2)
     ax2.tick_params(axis='y', labelcolor=color)
 
@@ -113,18 +113,18 @@ def plot_data(h_vals, d_vals):
 
     fig.tight_layout()
 
-    plt.savefig('out.png', format='png')
+    plt.savefig('/home/am/logdata/out.png', format='png')
 
 
 # pattern = 'rcsear_web*'
-# path = '/home/am/projects/playground/datascience/'
+# path = '/home/am/logdata/'
 # h_vals, d_vals = gen_data(pattern, path)
-# with open('h_data.pickle', 'wb') as f:
+# with open('/home/am/logdata/h_data.pickle', 'wb') as f:
 #    pickle.dump(h_vals, f, pickle.HIGHEST_PROTOCOL)
-# with open('d_data.pickle', 'wb') as f:
+# with open('/home/am/logdata/d_data.pickle', 'wb') as f:
 #    pickle.dump(d_vals, f, pickle.HIGHEST_PROTOCOL)
-with open('h_data.pickle', 'rb') as f:
+with open('/home/am/logdata/h_data.pickle', 'rb') as f:
     h_vals = pickle.load(f)
-with open('d_data.pickle', 'rb') as f:
+with open('/home/am/logdata/d_data.pickle', 'rb') as f:
     d_vals = pickle.load(f)
 plot_data(h_vals, d_vals)
