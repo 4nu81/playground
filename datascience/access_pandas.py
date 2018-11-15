@@ -9,8 +9,9 @@ import pickle
 import re
 from datetime import datetime as dt
 
-rh = r"\d+/\w+/\d+:\d+"
-rd = r"\d+/\w+/\d+"
+rhour = r"\d+/\w+/\d+:\d+"
+rday = r"\d+/\w+/\d+"
+rdomain = r"\d+\s\"https\:\/\/([^/\"]+)[\/\w\"]"
 
 def gen_cat(sources):
     """
@@ -32,7 +33,7 @@ def lines_from_dir(filepattern, dirname):
     lines = gen_cat(files)
     return lines
 
-def add_time(log, key):
+def increase_key(log, key):
     item = log.get(key, 0)
     log[key] = item + 1
 
@@ -45,28 +46,31 @@ def gen_logs(filename):
 def gen_data(pattern, path):
     h_values = {}
     d_values = {}
+    domains = {}
     for line in lines_from_dir(pattern, path):
         try:
-            key = re.findall(rh, line)[0]
-            add_time(h_values, key)
-            key = re.findall(rd, line)[0]
-            add_time(d_values, key)
+            key = re.findall(rhour, line)[0]
+            increase_key(h_values, key)
+            key = re.findall(rday, line)[0]
+            increase_key(d_values, key)
+            key = re.findall(rdomain, line)[0]
+            increase_key(domains, key)
         except:
             continue
-    return h_values, d_values
+    return h_values, d_values, domains
 
-d = dt.strptime
+ds = dt.strptime
 fmt = "%Y-%m-%d %H:00:00"
 
 def plot_data(h_vals, d_vals):
     h_vals = {dt.strptime(key, "%d/%b/%Y:%H").strftime(fmt):value for key, value in h_vals.items()}
     d_vals = {dt.strptime(key, "%d/%b/%Y").strftime(fmt):value for key, value in d_vals.items()}
     def get_min_max(vals):
-        min = d(next(iter(vals)), fmt)
-        max = d(next(iter(vals)), fmt)
+        min = ds(next(iter(vals)), fmt)
+        max = ds(next(iter(vals)), fmt)
         for key in vals:
-            min = d(key, fmt) < min and d(key, fmt) or min
-            max = d(key, fmt) > max and d(key, fmt) or max
+            min = ds(key, fmt) < min and ds(key, fmt) or min
+            max = ds(key, fmt) > max and ds(key, fmt) or max
         return min, max
     min, max = get_min_max(h_vals)
     idx = pd.date_range(start=min, end=max, freq='H')
@@ -115,16 +119,31 @@ def plot_data(h_vals, d_vals):
 
     plt.savefig('/home/am/logdata/out.png', format='png')
 
+def plot_domains(domains):
+    df = pd.DataFrame.from_dict(domains, orient='index', columns=['count'])
+    df = df.sort_values('count')
+    #df = df[df['count'] > 10000]
+    fig, ax = plt.subplots(figsize=(50,10), dpi=200)
+    df.plot(kind='bar', ax=ax, title="Domains with calls > 10000")
+    fig.tight_layout()
+    plt.savefig('/home/am/logdata/pie.png', format='png')
 
-# pattern = 'rcsear_web*'
-# path = '/home/am/logdata/'
-# h_vals, d_vals = gen_data(pattern, path)
-# with open('/home/am/logdata/h_data.pickle', 'wb') as f:
-#    pickle.dump(h_vals, f, pickle.HIGHEST_PROTOCOL)
-# with open('/home/am/logdata/d_data.pickle', 'wb') as f:
-#    pickle.dump(d_vals, f, pickle.HIGHEST_PROTOCOL)
+
+
+pattern = 'access.log'
+path = '/home/am/logdata/'
+h_vals, d_vals, domains = gen_data(pattern, path)
+with open('/home/am/logdata/h_data.pickle', 'wb') as f:
+   pickle.dump(h_vals, f, pickle.HIGHEST_PROTOCOL)
+with open('/home/am/logdata/d_data.pickle', 'wb') as f:
+   pickle.dump(d_vals, f, pickle.HIGHEST_PROTOCOL)
+with open('/home/am/logdata/domains.pickle', 'wb') as f:
+   pickle.dump(domains, f, pickle.HIGHEST_PROTOCOL)
 with open('/home/am/logdata/h_data.pickle', 'rb') as f:
     h_vals = pickle.load(f)
 with open('/home/am/logdata/d_data.pickle', 'rb') as f:
     d_vals = pickle.load(f)
+with open('/home/am/logdata/domains.pickle', 'rb') as f:
+    domains = pickle.load(f)
 plot_data(h_vals, d_vals)
+plot_domains(domains)
