@@ -9,9 +9,18 @@ import pickle
 import re
 from datetime import datetime as dt
 
+colnames = ('host','referrer','user','datetime','method','request','proto','status','bytes','url','browser')
+logpats  = r'(\S+) (\S+) (\S+) \[(.*?)\] "(\S+) (\S+) (\S+)" (\S+) (\S+) "(\S+)" "(.+)"'
+logpat   = re.compile(logpats)
+
 rhour = r"\d+/\w+/\d+:\d+"
 rday = r"\d+/\w+/\d+"
-rdomain = r"\d+\s\"https\:\/\/([^/\"]+)[\/\w\"]"
+rdomain = r"(\w+://[^/\"]+)[\/\w+]"
+
+def field_map(dictseq, name, func):
+    for d in dictseq:
+        d[name] = func(d[name])
+        yield d
 
 def gen_cat(sources):
     """
@@ -47,16 +56,25 @@ def gen_data(pattern, path):
     h_values = {}
     d_values = {}
     domains = {}
-    for line in lines_from_dir(pattern, path):
+
+    groups = (logpat.match(line) for line in lines_from_dir(pattern, path))
+    tuples = (g.groups() for g in groups if g)
+
+    log      = (dict(zip(colnames,t)) for t in tuples)
+    log      = field_map(log,"status",int)
+    log      = field_map(log,"bytes",
+                         lambda s: int(s) if s != '-' else 0)
+    for record in log:
+        key = re.findall(rhour, record['datetime'])[0]
+        increase_key(h_values, key)
+        key = re.findall(rday, record['datetime'])[0]
+        increase_key(d_values, key)
         try:
-            key = re.findall(rhour, line)[0]
-            increase_key(h_values, key)
-            key = re.findall(rday, line)[0]
-            increase_key(d_values, key)
-            key = re.findall(rdomain, line)[0]
+            key = re.findall(rdomain, record['url'])[0]
             increase_key(domains, key)
         except:
             continue
+
     return h_values, d_values, domains
 
 ds = dt.strptime
@@ -122,23 +140,23 @@ def plot_data(h_vals, d_vals):
 def plot_domains(domains):
     df = pd.DataFrame.from_dict(domains, orient='index', columns=['count'])
     df = df.sort_values('count')
-    #df = df[df['count'] > 10000]
-    fig, ax = plt.subplots(figsize=(50,10), dpi=200)
+    #df = df[df['count'] > 10000] # schneidet alle Einträge mit weniger als 10000 aufrufen ab.
+    fig, ax = plt.subplots(figsize=(100,10), dpi=200)
     df.plot(kind='bar', ax=ax, title="Domains with calls > 10000")
     fig.tight_layout()
     plt.savefig('/home/am/logdata/pie.png', format='png')
 
 
 
-pattern = 'access.log'
-path = '/home/am/logdata/'
-h_vals, d_vals, domains = gen_data(pattern, path)
-with open('/home/am/logdata/h_data.pickle', 'wb') as f:
-   pickle.dump(h_vals, f, pickle.HIGHEST_PROTOCOL)
-with open('/home/am/logdata/d_data.pickle', 'wb') as f:
-   pickle.dump(d_vals, f, pickle.HIGHEST_PROTOCOL)
-with open('/home/am/logdata/domains.pickle', 'wb') as f:
-   pickle.dump(domains, f, pickle.HIGHEST_PROTOCOL)
+# pattern = 'rcsear_webgui-access*'
+# path = '/home/am/logdata/'
+# h_vals, d_vals, domains = gen_data(pattern, path)
+# with open('/home/am/logdata/h_data.pickle', 'wb') as f:
+#    pickle.dump(h_vals, f, pickle.HIGHEST_PROTOCOL)
+# with open('/home/am/logdata/d_data.pickle', 'wb') as f:
+#    pickle.dump(d_vals, f, pickle.HIGHEST_PROTOCOL)
+# with open('/home/am/logdata/domains.pickle', 'wb') as f:
+#    pickle.dump(domains, f, pickle.HIGHEST_PROTOCOL)
 with open('/home/am/logdata/h_data.pickle', 'rb') as f:
     h_vals = pickle.load(f)
 with open('/home/am/logdata/d_data.pickle', 'rb') as f:
