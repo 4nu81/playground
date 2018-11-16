@@ -9,13 +9,25 @@ import pickle
 import re
 from datetime import datetime as dt
 
-colnames = ('host','referrer','user','datetime','method','request','proto','status','bytes','url','browser')
-logpats  = r'(\S+) (\S+) (\S+) \[(.*?)\] "(\S+) (\S+) (\S+)" (\S+) (\S+) "(\S+)" "(.+)"'
+# LogFormat "%t %{Host}i %>s %O %D \"%r\"" request
+# [16/Nov/2018:09:41:06 +0100] gui-test.mms-rcs.de 200 8229 835 "GET /server-status HTTP/1.1"
+#
+colnames = ('datetime', 'url', 'status', 'bytes', 'servetime', 'first')
+logpats = r'\[(.+?)\] (\S+) (\S+) (\S+) (\S+) \"(.*?)\"'
+
+# colnames = ('host','referrer','user','datetime','method','request','proto','status','bytes','url','browser')
+# logpats  = r'(\S+) (\S+) (\S+) \[(.*?)\] "(\S+) (\S+) (\S+)" (\S+) (\S+) "(\S+)" "(.+)"'
 logpat   = re.compile(logpats)
 
 rhour = r"\d+/\w+/\d+:\d+"
 rday = r"\d+/\w+/\d+"
-rdomain = r"(\w+://[^/\"]+)[\/\w+]"
+# rdomain = r"(\w+://[^/\"]+)[\/\w+]"
+
+ds = dt.strptime
+fmt = "%Y-%m-%d %H:00:00"
+
+pattern = 'rcsear_webgui-access-test.log'
+path = '/home/am/logdata/'
 
 def field_map(dictseq, name, func):
     for d in dictseq:
@@ -46,12 +58,6 @@ def increase_key(log, key):
     item = log.get(key, 0)
     log[key] = item + 1
 
-def gen_logs(filename):
-    print('working... ', filename)
-    with open(filename, 'r') as f:
-        for line in f:
-            yield line
-
 def gen_data(pattern, path):
     h_values = {}
     d_values = {}
@@ -62,25 +68,36 @@ def gen_data(pattern, path):
 
     log      = (dict(zip(colnames,t)) for t in tuples)
     log      = field_map(log,"status",int)
-    log      = field_map(log,"bytes",
-                         lambda s: int(s) if s != '-' else 0)
+    log      = field_map(log,"bytes",lambda s: int(s) if s != '-' else 0)
     for record in log:
         key = re.findall(rhour, record['datetime'])[0]
         increase_key(h_values, key)
         key = re.findall(rday, record['datetime'])[0]
         increase_key(d_values, key)
-        try:
-            key = re.findall(rdomain, record['url'])[0]
-            increase_key(domains, key)
-        except:
-            continue
-
+        increase_key(domains, record['url'])
+        # key = re.findall(rdomain, record['url'])[0]
+        # increase_key(domains, key)
     return h_values, d_values, domains
 
-ds = dt.strptime
-fmt = "%Y-%m-%d %H:00:00"
+def pickle_dump(h_vals, d_vals, domains):
+    with open('/home/am/logdata/h_data.pickle', 'wb') as f:
+       pickle.dump(h_vals, f, pickle.HIGHEST_PROTOCOL)
+    with open('/home/am/logdata/d_data.pickle', 'wb') as f:
+       pickle.dump(d_vals, f, pickle.HIGHEST_PROTOCOL)
+    with open('/home/am/logdata/domains.pickle', 'wb') as f:
+       pickle.dump(domains, f, pickle.HIGHEST_PROTOCOL)
+
+def pickle_load():
+    with open('/home/am/logdata/h_data.pickle', 'rb') as f:
+        h_vals = pickle.load(f)
+    with open('/home/am/logdata/d_data.pickle', 'rb') as f:
+        d_vals = pickle.load(f)
+    with open('/home/am/logdata/domains.pickle', 'rb') as f:
+        domains = pickle.load(f)
+    return h_vals, d_vals, domains
 
 def plot_data(h_vals, d_vals):
+    print(d_vals, h_vals)
     h_vals = {dt.strptime(key, "%d/%b/%Y:%H").strftime(fmt):value for key, value in h_vals.items()}
     d_vals = {dt.strptime(key, "%d/%b/%Y").strftime(fmt):value for key, value in d_vals.items()}
     def get_min_max(vals):
@@ -117,9 +134,7 @@ def plot_data(h_vals, d_vals):
     ax1.bar(df2.index, df2['d_count'], color=color, width=1, align='edge', edgecolor='#000099', linewidth=1)
     ax1.tick_params(axis='y', labelcolor=color)
 
-
-
-    ax2 = ax1.twinx()
+    ax2 = ax1.twinx() #share the x axis
 
     color = '#FF0000'
     ax2.set_ylabel('n/h')
@@ -142,26 +157,12 @@ def plot_domains(domains):
     df = df.sort_values('count')
     #df = df[df['count'] > 10000] # schneidet alle Einträge mit weniger als 10000 aufrufen ab.
     fig, ax = plt.subplots(figsize=(100,10), dpi=200)
-    df.plot(kind='bar', ax=ax, title="Domains with calls > 10000")
+    df.plot(kind='bar', ax=ax, title="Domains")# with calls > 10000")
     fig.tight_layout()
     plt.savefig('/home/am/logdata/pie.png', format='png')
 
-
-
-# pattern = 'rcsear_webgui-access*'
-# path = '/home/am/logdata/'
-# h_vals, d_vals, domains = gen_data(pattern, path)
-# with open('/home/am/logdata/h_data.pickle', 'wb') as f:
-#    pickle.dump(h_vals, f, pickle.HIGHEST_PROTOCOL)
-# with open('/home/am/logdata/d_data.pickle', 'wb') as f:
-#    pickle.dump(d_vals, f, pickle.HIGHEST_PROTOCOL)
-# with open('/home/am/logdata/domains.pickle', 'wb') as f:
-#    pickle.dump(domains, f, pickle.HIGHEST_PROTOCOL)
-with open('/home/am/logdata/h_data.pickle', 'rb') as f:
-    h_vals = pickle.load(f)
-with open('/home/am/logdata/d_data.pickle', 'rb') as f:
-    d_vals = pickle.load(f)
-with open('/home/am/logdata/domains.pickle', 'rb') as f:
-    domains = pickle.load(f)
+h_vals, d_vals, domains = gen_data(pattern, path)
+pickle_dump(h_vals, d_vals, domains) # for dev
+h_vals, d_vals, domains = pickle_load() # for dev
 plot_data(h_vals, d_vals)
 plot_domains(domains)
