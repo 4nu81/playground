@@ -26,7 +26,7 @@ rday = r"\d+/\w+/\d+"
 ds = dt.strptime
 fmt = "%Y-%m-%d %H:00:00"
 
-pattern = 'rcsear_webgui-access-test.log'
+pattern = 'rcsear_webgui-access.log'
 path = '/home/am/logdata/'
 
 def field_map(dictseq, name, func):
@@ -58,10 +58,17 @@ def increase_key(log, key):
     item = log.get(key, 0)
     log[key] = item + 1
 
+def add_access_duration(log, key, duration):
+    item = log.get(key, {'amount': 0, 'duration':0})
+    item['amount'] += 1
+    item['duration'] += float(duration)
+    log[key] = item
+
 def gen_data(pattern, path):
     h_values = {}
     d_values = {}
     domains = {}
+    durations = {}
 
     groups = (logpat.match(line) for line in lines_from_dir(pattern, path))
     tuples = (g.groups() for g in groups if g)
@@ -72,20 +79,24 @@ def gen_data(pattern, path):
     for record in log:
         key = re.findall(rhour, record['datetime'])[0]
         increase_key(h_values, key)
+        if not 'static' in record['first'] or 'media' in record['first']:
+            add_access_duration(log=durations, key=key, duration=record['servetime'])
         key = re.findall(rday, record['datetime'])[0]
         increase_key(d_values, key)
         increase_key(domains, record['url'])
-        # key = re.findall(rdomain, record['url'])[0]
-        # increase_key(domains, key)
-    return h_values, d_values, domains
 
-def pickle_dump(h_vals, d_vals, domains):
+    durations = { key: int(value['duration'] / value['amount']) / 1000 for key,value in durations.items()}
+    return h_values, d_values, domains, durations
+
+def pickle_dump(h_vals, d_vals, domains, durations):
     with open('/home/am/logdata/h_data.pickle', 'wb') as f:
        pickle.dump(h_vals, f, pickle.HIGHEST_PROTOCOL)
     with open('/home/am/logdata/d_data.pickle', 'wb') as f:
        pickle.dump(d_vals, f, pickle.HIGHEST_PROTOCOL)
     with open('/home/am/logdata/domains.pickle', 'wb') as f:
        pickle.dump(domains, f, pickle.HIGHEST_PROTOCOL)
+    with open('/home/am/logdata/durations.pickle', 'wb') as f:
+        pickle.dump(durations, f, pickle.HIGHEST_PROTOCOL)
 
 def pickle_load():
     with open('/home/am/logdata/h_data.pickle', 'rb') as f:
@@ -94,12 +105,16 @@ def pickle_load():
         d_vals = pickle.load(f)
     with open('/home/am/logdata/domains.pickle', 'rb') as f:
         domains = pickle.load(f)
-    return h_vals, d_vals, domains
+    with open('/home/am/logdata/durations.pickle', 'rb') as f:
+        durations = pickle.load(f)
+    return h_vals, d_vals, domains, durations
 
-def plot_data(h_vals, d_vals):
-    print(d_vals, h_vals)
+def plot_data(h_vals, d_vals, durations):
+    # alter keys du unified format
     h_vals = {dt.strptime(key, "%d/%b/%Y:%H").strftime(fmt):value for key, value in h_vals.items()}
     d_vals = {dt.strptime(key, "%d/%b/%Y").strftime(fmt):value for key, value in d_vals.items()}
+    durations = {dt.strptime(key, "%d/%b/%Y:%H").strftime(fmt):value for key, value in durations.items()}
+
     def get_min_max(vals):
         min = ds(next(iter(vals)), fmt)
         max = ds(next(iter(vals)), fmt)
@@ -109,14 +124,16 @@ def plot_data(h_vals, d_vals):
         return min, max
     min, max = get_min_max(h_vals)
     idx = pd.date_range(start=min, end=max, freq='H')
-    df = pd.DataFrame(index=idx, columns=['h_count','d_count'])
+    df = pd.DataFrame(index=idx, columns=['h_count','d_count', 'duration'])
     df['h_count'] = pd.to_numeric(df['h_count'])
     df['d_count'] = pd.to_numeric(df['d_count'])
+    df['duration'] = pd.to_numeric(df['duration'])
 
     #populate
     for key, h_value in h_vals.items():
         d_value = d_vals.get(key, np.NaN)
-        df.loc[key] = [h_value, d_value]
+        duration = durations[key]
+        df.loc[key] = [h_value, d_value, duration]
 
     df2 = df[df.d_count.notnull()]
 
@@ -141,6 +158,13 @@ def plot_data(h_vals, d_vals):
     ax2.plot(df.index, 'h_count', data=df, color=color, linewidth=2)
     ax2.tick_params(axis='y', labelcolor=color)
 
+    ax3 = ax2.twinx()
+
+    color = '#00FF00'
+    ax3.set_ylabel('durchschnitt Dauer pro call')
+    ax3.plot(df.index, 'duration', data=df, color=color, linewidth=2)
+    ax3.tick_params(axis='y', labelcolor=color)
+
     plt.xticks(ticks=xticks, labels=xlabels)
     ax1.xaxis.set_minor_locator(dates.HourLocator(interval=6))
 
@@ -161,8 +185,8 @@ def plot_domains(domains):
     fig.tight_layout()
     plt.savefig('/home/am/logdata/pie.png', format='png')
 
-h_vals, d_vals, domains = gen_data(pattern, path)
-pickle_dump(h_vals, d_vals, domains) # for dev
-h_vals, d_vals, domains = pickle_load() # for dev
-plot_data(h_vals, d_vals)
+h_vals, d_vals, domains, durations = gen_data(pattern, path)
+#pickle_dump(h_vals, d_vals, domains, durations) # for dev
+#h_vals, d_vals, domains, durations = pickle_load() # for dev
+plot_data(h_vals, d_vals, durations)
 plot_domains(domains)
