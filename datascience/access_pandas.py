@@ -138,7 +138,7 @@ def plot_data(h_vals, d_vals, durations):
     df2 = df[df.d_count.notnull()]
 
     xticks = [item for item in idx if item.hour == 0]
-    xlabels = [dt.strftime(item, "%b %d") for item in xticks]
+    xlabels = [dt.strftime(item, "%a %b %d") for item in xticks]
 
     fig,ax1 = plt.subplots(figsize=(30,10), dpi=200)
 
