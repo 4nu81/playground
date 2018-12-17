@@ -77,13 +77,13 @@ def gen_data(pattern, path):
     log      = field_map(log,"status",int)
     log      = field_map(log,"bytes",lambda s: int(s) if s != '-' else 0)
     for record in log:
-        key = re.findall(rhour, record['datetime'])[0]
-        increase_key(h_values, key)
         if not 'static' in record['first'] or 'media' in record['first']:
+            key = re.findall(rhour, record['datetime'])[0]
+            increase_key(h_values, key)
             add_access_duration(log=durations, key=key, duration=record['servetime'])
-        key = re.findall(rday, record['datetime'])[0]
-        increase_key(d_values, key)
-        increase_key(domains, record['url'])
+            key = re.findall(rday, record['datetime'])[0]
+            increase_key(d_values, key)
+            increase_key(domains, record['url'])
 
     durations = { key: int(value['duration'] / value['amount']) / 1000 for key,value in durations.items()}
     return h_values, d_values, domains, durations
@@ -145,11 +145,15 @@ def plot_data(h_vals, d_vals, durations):
     plt.xticks(fontweight='bold', horizontalalignment='left')
     plt.yticks(fontweight='bold')
 
+
+
     color = '#AAAAFF'
     ax1.set_xlabel('date')
     ax1.set_ylabel('n/d')
     ax1.bar(df2.index, df2['d_count'], color=color, width=1, align='edge', edgecolor='#000099', linewidth=1)
     ax1.tick_params(axis='y', labelcolor=color)
+
+
 
     ax2 = ax1.twinx() #share the x axis
 
@@ -158,11 +162,15 @@ def plot_data(h_vals, d_vals, durations):
     ax2.plot(df.index, 'h_count', data=df, color=color, linewidth=2)
     ax2.tick_params(axis='y', labelcolor=color)
 
+
+
     ax3 = ax2.twinx()
 
     color = '#00FF00'
     ax3.set_ylabel('T/n')
     ax3.plot(df.index, 'duration', data=df, color=color, linewidth=2)
+
+
 
     plt.minorticks_on()
 
@@ -189,4 +197,4 @@ h_vals, d_vals, domains, durations = gen_data(pattern, path)
 pickle_dump(h_vals, d_vals, domains, durations) # for dev
 h_vals, d_vals, domains, durations = pickle_load() # for dev
 plot_data(h_vals, d_vals, durations)
-#plot_domains(domains)
+plot_domains(domains)
