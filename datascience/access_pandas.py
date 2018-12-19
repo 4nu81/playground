@@ -175,7 +175,7 @@ def plot_data(h_vals, d_vals, durations):
     plt.minorticks_on()
 
     plt.xticks(ticks=xticks, labels=xlabels)
-    ax1.xaxis.set_minor_locator(dates.HourLocator(interval=6))    
+    ax1.xaxis.set_minor_locator(dates.HourLocator(byhour=range(0, 24, 6)))
 
     ax1.grid(b=True, which="minor", axis="x", color="r", linestyle=":")
     ax1.grid(b=True, which="major", axis="x", color="b", linestyle="-")
