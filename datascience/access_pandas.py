@@ -15,6 +15,7 @@ from datetime import datetime as dt
 colnames = ('datetime', 'url', 'status', 'bytes', 'servetime', 'first')
 logpats = r'\[(.+?)\] (\S+) (\S+) (\S+) (\S+) \"(.*?)\"'
 
+first_line_pattern = re.compile(r'(?P<method>\S+) (?P<path>\S+) (?P<user_agent>\S+)')
 # colnames = ('host','referrer','user','datetime','method','request','proto','status','bytes','url','browser')
 # logpats  = r'(\S+) (\S+) (\S+) \[(.*?)\] "(\S+) (\S+) (\S+)" (\S+) (\S+) "(\S+)" "(.+)"'
 logpat   = re.compile(logpats)
@@ -64,11 +65,17 @@ def add_access_duration(log, key, duration):
     item['duration'] += float(duration)
     log[key] = item
 
+def endpoint_duration(log, day, endpoint, duration):
+    item = log.get(day, {})
+    add_access_duration(item, endpoint, duration)
+    log[day] = item
+
 def gen_data(pattern, path):
     h_values = {}
     d_values = {}
     domains = {}
     durations = {}
+    endpoints = {}
 
     groups = (logpat.match(line) for line in lines_from_dir(pattern, path))
     tuples = (g.groups() for g in groups if g)
@@ -77,18 +84,34 @@ def gen_data(pattern, path):
     log      = field_map(log,"status",int)
     log      = field_map(log,"bytes",lambda s: int(s) if s != '-' else 0)
     for record in log:
-        if not 'static' in record['first'] or 'media' in record['first']:
-            key = re.findall(rhour, record['datetime'])[0]
-            increase_key(h_values, key)
-            add_access_duration(log=durations, key=key, duration=record['servetime'])
-            key = re.findall(rday, record['datetime'])[0]
-            increase_key(d_values, key)
+        exemptions = ['media', 'static', 'apple-touch', 'favicon']
+        if not any(substring in record['first'] for substring in exemptions):
+            hour = re.findall(rhour, record['datetime'])[0]
+            increase_key(h_values, hour)
+            add_access_duration(log=durations, key=hour, duration=record['servetime'])
+
+            day = re.findall(rday, record['datetime'])[0]
+            increase_key(d_values, day)
+
+            first = first_line_pattern.match(record['first'])
+            if first:
+                first = first.groupdict()
+
+                endpoint = first['path'].split('?', 1)[0].split('superlogin/', 1)[0].split('contracts/', 1)[0].split('reset_password/', 1)[0].split('verify_email/', 1)[0].split('register/form/', 1)[0].split('change_template/', 1)[0]
+                endpoint_duration(log=endpoints, day=day, endpoint=endpoint, duration=record['servetime'])
+
             increase_key(domains, record['url'])
 
-    durations = { key: int(value['duration'] / value['amount']) / 1000 for key,value in durations.items()}
-    return h_values, d_values, domains, durations
+    #servetime comes in microseconds, so it is converted to ms for we only care about that scale
+    durations = { key: int(value['duration'] / value['amount'] / 1000) for key,value in durations.items()}
 
-def pickle_dump(h_vals, d_vals, domains, durations):
+    def calc_average(day):
+        return { endpoint: int(value['duration'] / value['amount'] / 1000) for endpoint, value in day.items()}
+    endpoints = { day: calc_average(value) for day,value in endpoints.items()}
+
+    return h_values, d_values, domains, durations, endpoints
+
+def pickle_dump(h_vals, d_vals, domains, durations, endpoints):
     with open('/tmp/h_data.pickle', 'wb') as f:
         pickle.dump(h_vals, f, pickle.HIGHEST_PROTOCOL)
     with open('/tmp/d_data.pickle', 'wb') as f:
@@ -97,6 +120,8 @@ def pickle_dump(h_vals, d_vals, domains, durations):
         pickle.dump(domains, f, pickle.HIGHEST_PROTOCOL)
     with open('/tmp/durations.pickle', 'wb') as f:
         pickle.dump(durations, f, pickle.HIGHEST_PROTOCOL)
+    with open('/tmp/endpoints.pickle', 'wb') as f:
+        pickle.dump(endpoints, f, pickle.HIGHEST_PROTOCOL)
 
 def pickle_load():
     with open('/tmp/h_data.pickle', 'rb') as f:
@@ -107,7 +132,9 @@ def pickle_load():
         domains = pickle.load(f)
     with open('/tmp/durations.pickle', 'rb') as f:
         durations = pickle.load(f)
-    return h_vals, d_vals, domains, durations
+    with open('/tmp/endpoints.pickle', 'rb') as f:
+        endpoints = pickle.load(f)
+    return h_vals, d_vals, domains, durations, endpoints
 
 def plot_data(h_vals, d_vals, durations):
     # alter keys du unified format
@@ -193,8 +220,9 @@ def plot_domains(domains):
     fig.tight_layout()
     plt.savefig('/home/am/logdata/pie2.png', format='png')
 
-h_vals, d_vals, domains, durations = gen_data(pattern, path)
-pickle_dump(h_vals, d_vals, domains, durations) # for dev
-h_vals, d_vals, domains, durations = pickle_load() # for dev
-plot_data(h_vals, d_vals, durations)
-plot_domains(domains)
+h_vals, d_vals, domains, durations, endpoints = gen_data(pattern, path)
+pickle_dump(h_vals, d_vals, domains, durations, endpoints) # for dev
+print(endpoints)
+#h_vals, d_vals, domains, durations, endpoints = pickle_load() # for dev
+#plot_data(h_vals, d_vals, durations)
+#plot_domains(domains)
