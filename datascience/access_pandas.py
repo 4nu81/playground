@@ -70,6 +70,68 @@ def endpoint_duration(log, day, endpoint, duration):
     add_access_duration(item, endpoint, duration)
     log[day] = item
 
+def endpoints_we_need(endpoint):
+    endPointsOfInterest = [
+        '/superlogin',
+        '/register',
+        '/menu',
+        '/orders',
+        '/password_reset_success',
+        '/accounts',
+        '/cancellation',
+        '/impressum',
+        '/content',
+        '/change_template',
+        '/agb',
+        '/popup',
+        '/privacy',
+        '/reset_password',
+        '/faq',
+        '/contact',
+    ]
+    return any([endpoint.startswith(item) for item in endPointsOfInterest])
+
+def crop_endpoint(e):
+    e = e.split('?', 1)[0]
+    patterns = [
+        '/superlogin',
+        '/contracts',
+        '/reset_password',
+        '/password_reset_success',
+        '/verify_email',
+        '/register/form',
+        '/register/contract_id',
+        '/register/contracts',
+        '/register/success',
+        '/change_template',
+        '/menu',
+        '/orders/2019',
+        '/orders/2018',
+        '/orders/2017',
+        '/orders/confirmation',
+        '/impressum',
+        '/contact',
+        '/accounts/profile',
+        '/accounts/password/require',
+        '/accounts/login',
+        '/accounts/superlogin',
+        '/accounts/logout',
+        '/content',
+        '/faq',
+        '/agb',
+        '/cancellation',
+        '/privacy',
+        '/popup',
+        '/popup_agb',
+        '/popup_cancellation',
+        '/popup_privacy',
+    ]
+    for s in patterns:
+        if e.startswith(s):
+            e = s
+            break
+    return e
+
 def gen_data(pattern, path):
     h_values = {}
     d_values = {}
@@ -97,8 +159,9 @@ def gen_data(pattern, path):
             if first:
                 first = first.groupdict()
 
-                endpoint = first['path'].split('?', 1)[0].split('superlogin/', 1)[0].split('contracts/', 1)[0].split('reset_password/', 1)[0].split('verify_email/', 1)[0].split('register/form/', 1)[0].split('change_template/', 1)[0]
-                endpoint_duration(log=endpoints, day=day, endpoint=endpoint, duration=record['servetime'])
+                endpoint = crop_endpoint(first['path'])
+                if endpoints_we_need(endpoint):
+                    endpoint_duration(log=endpoints, day=day, endpoint=endpoint, duration=record['servetime'])
 
             increase_key(domains, record['url'])
 
@@ -222,7 +285,10 @@ def plot_domains(domains):
 
 h_vals, d_vals, domains, durations, endpoints = gen_data(pattern, path)
 pickle_dump(h_vals, d_vals, domains, durations, endpoints) # for dev
-print(endpoints)
-#h_vals, d_vals, domains, durations, endpoints = pickle_load() # for dev
+h_vals, d_vals, domains, durations, endpoints = pickle_load() # for dev
 #plot_data(h_vals, d_vals, durations)
 #plot_domains(domains)
+
+import json
+with open('endpoints.dump', 'w') as f:
+    f.write(json.dumps(endpoints, indent=4, sort_keys=True))
