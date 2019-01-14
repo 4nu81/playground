@@ -286,8 +286,8 @@ def plot_domains(domains):
 h_vals, d_vals, domains, durations, endpoints = gen_data(pattern, path)
 pickle_dump(h_vals, d_vals, domains, durations, endpoints) # for dev
 h_vals, d_vals, domains, durations, endpoints = pickle_load() # for dev
-#plot_data(h_vals, d_vals, durations)
-#plot_domains(domains)
+plot_data(h_vals, d_vals, durations)
+plot_domains(domains)
 
 import json
 with open('endpoints.dump', 'w') as f:
