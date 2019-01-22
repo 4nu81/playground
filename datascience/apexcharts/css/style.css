@@ -2,7 +2,7 @@
 body {
     font-family: Roboto, sans-serif;
 };
-#chart {
+div .chart {
     max-width: 650px;
     margin: 35px auto;
 }

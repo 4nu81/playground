@@ -79,7 +79,7 @@ function step() {
 
 function start(){
     if (run) {
-      game()
+        game()
     }
 }
 
