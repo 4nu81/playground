@@ -1,0 +1,7 @@
+Best Praxis for daily report:
+
+download logfile via scp
+grep -h "<Date>" <logfilename or pattern> > <logfile for specific date>
+    -h schreibt die Dateinamen nicht mit, wo das Pattern "<Date>" gefunden wurde.
+python3 access_pandas_daily.py -f <logfile for specific date> -p <path to logfile> -o <output>
+    Note: ".png" will be added to outputfile automaticly
