@@ -146,9 +146,12 @@ def plot_data(m_vals, h_vals, durations, outputfile):
 
     ax3 = ax2.twinx()
 
+
     color = '#00FF00'
     ax3.set_ylabel('T/n')
+    ax3.set_ylim([0,30000])
     ax3.plot(df.index, 'duration', data=df, color=color, linewidth=2)
+
 
 
 
