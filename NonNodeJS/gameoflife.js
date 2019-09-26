@@ -9,6 +9,7 @@ window.onload = function() {
     document.addEventListener("keydown", keyPush)
     document.addEventListener("mousedown", mouseDown)
     plane1 = clearPlane(false)
+    audio = new Audio('Tetris_theme.ogg');
     print()
     setInterval(start, 50)
 }
@@ -85,6 +86,13 @@ function start(){
 
 function toggle_run() {
     run = !run
+    if (run) {
+        audio.play();
+        audio.loop = true;
+    } else {
+        audio.pause();
+        audio.load();
+    }
 }
 
 function game() {

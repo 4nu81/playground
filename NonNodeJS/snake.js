@@ -4,6 +4,20 @@ window.onload = function() {
     document.addEventListener("keydown", keyPush)
     setInterval(game,80)
 }
+
+function play (soundfile) {
+    s = new Audio(soundfile)
+    s.play()
+}
+
+sound = {
+    coin : () => play("smb_coin.wav"),
+    death : () => play("smb_mariodie.wav"),
+    warp : () => play("smb_pipe.wav"),
+    grow : () => play("smb_vine.wav"),
+    //grow : () => play("sonic_-_rings.mp3"),
+    music : () => play("Tetris_theme.ogg")
+}
 xv = yv = 0;
 px = py = 10;
 gs = 20;
@@ -47,20 +61,25 @@ function game() {
         py+=yv;
         if(px<0) {
             px= tc-1;
+            sound.warp()
         }
         if(px>tc-1) {
             px= 0;
+            sound.warp()
         }
         if(py<0) {
             py= tc-1;
+            sound.warp()
         }
         if(py>tc-1) {
             py= 0;
+            sound.warp()
         }
         
         for(var i=0;i<trail.length;i++) {
             if(trail[i].x==px && trail[i].y==py) {
                 if (xv || yv) {
+                    sound.death();
                     msg = "You Failed. Length was " + tail
                     tail = 5;
                     pause = true;
@@ -77,6 +96,7 @@ function game() {
         }
 
         if(ax==px && ay==py) {
+            sound.grow();
             tail+=5;
             ax=Math.floor(Math.random()*tc);
             ay=Math.floor(Math.random()*tc);

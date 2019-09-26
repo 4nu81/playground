@@ -1,0 +1,123 @@
+$base-color: white;
+$accent-color: gold;
+$article-color: #181818;
+$accent2-color: red;
+$text_color: gray;
+$background-color: black;
+
+@import url('https://fonts.googleapis.com/css?family=Lato|Prata&display=swap');
+
+body {
+    margin: 0;
+    background: $background-color;
+    color: $text-color;
+    text-align: center;
+}
+
+h1, h2, h3 {
+    font-family: 'Prata';
+    margin-top: 0;
+    margin-bottom: 2em;
+}
+
+h3 {
+    color: $accent-color;
+}
+
+p {
+    font-family: 'Lato';
+    color: $text-color;
+    margin-top: 0;
+}
+
+.outer {
+    padding: 1em;
+}
+
+section {
+    column-count: 1;
+    column-gap: 2em;
+}
+
+img {
+    width: 80%;
+    margin: 1em 0 0;
+}
+
+@media only screen and (min-width: 786px) {
+    body {
+        text-align: left;
+        font-size: 18px;
+    }
+    p {
+        line-height: 1.6em;
+    }
+    section {
+        column-count: 2;
+        column-rule-style: solid;
+        column-rule-color: $base-color;
+    }
+    section > * {
+        margin-top: 0;
+    }
+    
+    h1 {
+        font-size: 3rem;
+        margin: 2em 0 1em;
+    }
+    .outer {
+        padding: 4em;
+    }
+    article {
+        padding: 2em;
+        background: $article-color;
+    }
+
+    h2 {
+        display: inline-block;
+        position: relative;
+        z-index: 1;
+
+        &::before {
+            content: ' ';
+            position: absolute;
+            width: 5em;
+            height: 10px;
+            bottom: -0.2em;
+            left: -0.5em;
+            z-index: -1;
+            background: $accent2-color;
+            border-radius: 1em;
+        }
+    }
+
+    .secondary {
+        margin-top: 2em;
+    }
+    img {
+        width: 100%;
+    }
+    h3 {
+        color: $base-color;
+        margin: 1.5em 0 1em;
+    }
+
+    p.span-all {
+        column-span: all;
+        font-size: 1.6em;
+        padding: .5em;
+        margin: 2em, 0;
+        color: white;
+        text-align: center;
+    }
+}
+
+@media only screen and (min-width: 1100px) {
+    .outer {
+        margin: 0 auto;
+        width: 70%;
+    }
+    section {
+        column-count: 3;
+    }
+}
