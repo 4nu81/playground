@@ -42,6 +42,9 @@ section {
 img {
     width: 80%;
     margin: 1em 0 0;
+    border-color: $base-color;
+    border: solid white 1px;
+    border-radius: 1em;
 }
 
 @media only screen and (min-width: 786px) {

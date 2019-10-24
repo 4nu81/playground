@@ -1,40 +1,117 @@
+var tdata = [];
+var hdata = [];
+var TICKINTERVAL = 3000;
+var SHOWNVALUES = 10;
+var XAXISRANGE = TICKINTERVAL * SHOWNVALUES;
+
+function newSeries () {
+    var date = Date.now();
+    var tvalue = Math.floor(Math.random() * 100);
+    var hvalue = Math.floor(Math.random() * 100);
+
+    tdata.push(
+        {
+            x: date,
+            y: tvalue
+        }
+    );
+    hdata.push(
+        {
+            x: date,
+            y: hvalue,
+        }
+    )
+}
+
+newSeries();
+
 var options = {
     chart: {
         type: 'line',
         height: 350,
-        width: 650
+        width: 650,
+        animations: {
+            enabled: true,
+            easing: 'linear',
+            dynamicAnimation: {
+                speed: 1000,
+            },
+        }
     },
-    series: [{
-        name: 'Fucks I gave',
-        type: 'column',
-        data: [10,24,56,97,149,72,40,27,12]
-    },
-    {
-        name: 'Verkaufszahlen',
-        type: 'line',
-        data: [30,40,45,50,49,60,70,91,125]
-    }
+    series: [
+        {
+            name: 'Temperature',
+            type: 'line',
+            data: tdata,
+        },
+        {
+            name: 'Humidity',
+            type: 'line',
+            data: hdata,
+        }
     ],
     stroke: {
-        width: [0,4]
+        curve: "smooth",
     },
-    labels: ['Jan', 'Feb', 'Mrz', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
+    markers: {
+        size: 0,
+    },
+    legend: {
+        show: false
+    },
+    dataLabels: {
+        enabled: false
+    },
     title: {
-        text: 'Produkt x - Verkaufszahlen',
+        text: 'Weather Data',
         align: 'left'
     },
-    yaxis: [{
-        title: {
-            text: 'Gesamtumsatz'
+    xaxis: {
+        type: "datetime",
+        labels: {
+            formatter: function (val) {
+                return moment(new Date(val)).format('h:mm:ss')
+            }
+        },
+        range: XAXISRANGE,
+    },
+    yaxis: [
+        {
+            title: {
+                text: 'Temp',
+            },
+            labels: {
+                formatter:  function (val) {
+                    return val + '°C';
+                }
+            }
+        },
+        {
+            opposite: true,
+            title: {
+                text: 'Humidity',
+            },
+            labels:{
+                formatter: function (val) {
+                    return val + '%';
+                }
+            }                
         }
-    },{
-        opposite: true,
-        title: {
-            text: 'Produkt x'
-        }
-    }]
+    ],
+    theme: {
+        mode: 'dark'
+    }
 }
 
 var chart = new ApexCharts(document.querySelector("#chart"), options);
 
 chart.render();
+
+window.setInterval(function () {
+    newSeries();
+    chart.updateSeries([{
+        data: tdata
+    },{
+        data: hdata
+    }]);
+},TICKINTERVAL);
