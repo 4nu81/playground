@@ -1,0 +1,21 @@
+@url=http://localhost:3000
+
+###
+
+POST {{url}} HTTP/1.1
+Content-Type: application/json
+
+{
+    "temp": {{$randomInt 0 40}},
+    "moist": {{$randomInt 50 80}}
+}
+
+###
+
+DELETE {{url}} HTTP/1.1
+Content-Type: application/json
+
+###
+
+GET {{url}} HTTP/1.1
+Content-Type: application/json
