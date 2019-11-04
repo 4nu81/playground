@@ -1,0 +1,23 @@
+.list {
+    display: grid;
+    gap: 0.5em;
+    grid-auto-rows: repeat(auto-fit, minmax(100px, 100px));
+    grid-auto-flow: row;
+}
+/********************************/
+.menu {
+    padding: 0.5em 1em 0.5em 1em;
+    background: greenyellow;
+}
+/********************************/
+.row {
+    display: grid;
+    gap: 0.5em;
+    grid-auto-columns: 150px;
+    grid-auto-flow: column;
+    border: black solid 1px;
+}
+
+.col {
+    
+}
