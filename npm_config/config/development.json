@@ -1,0 +1,5 @@
+{
+    "testUrl" : "dev-default URL",
+    "development" : "true",
+    "development-app" : "false"
+}

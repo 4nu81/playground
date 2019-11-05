@@ -1,4 +1,12 @@
-require('dotenv').config()
+const path = require('path')
+var dotenvPath = path.resolve(process.cwd(), '.env')
+var dotenv = require('dotenv').config({
+    path: dotenvPath
+})
+
+if (dotenv.error) {throw dotenv.error}
+
+console.log(dotenv.parsed)
 
 const express = require('express')
 const app = express()
@@ -20,8 +28,12 @@ app.post('/token', (req, res) => {
     if (!refreshTokens.includes(refreshToken)) return res.sendStatus(403)
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
         if (err) return res.sendStatus(403)
-        const accessToken = generateAccessToken({name: user.name})
-        res.json({accessToken: accessToken})
+        const accessToken = generateAccessToken({
+            name: user.name
+        })
+        res.json({
+            accessToken: accessToken
+        })
     })
 })
 
@@ -29,12 +41,17 @@ app.post('/login', (req, res) => {
     // Authenticate User
 
     const username = req.body.username
-    const user = {name: username}
+    const user = {
+        name: username
+    }
 
     const accessToken = generateAccessToken(user)
     const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET)
     refreshTokens.push(refreshToken)
-    res.json({acressToken: accessToken, refreshToken: refreshToken})
+    res.json({
+        accessToken: accessToken,
+        refreshToken: refreshToken
+    })
 })
 
 function generateAccessToken(user) {
