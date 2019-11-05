@@ -1,5 +1,23 @@
 GET http://localhost:3000/posts
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQW5kaSIsImlhdCI6MTU3Mjg3NDQ0N30.NMaRUtE-sRqKLkztlUFQHgoea5yh0_GHDRS7273qk-Q
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQW5kaSIsImlhdCI6MTU3MjkxMTUxNiwiZXhwIjoxNTcyOTExNTMxfQ.cgfKEQ88W3QSMueKeHKmMNRwPAvA2ZaAoDmzXRIIXeY
+
+###
+
+POST http://localhost:4000/token
+Content-Type: application/json
+
+{
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQW5kaSIsImlhdCI6MTU3MjkxMTQ4MX0.BXI3jrRMM2EU_WUuBvD1bgzpUau9K4uior3kmxzDLKw"
+}
+
+###
+
+DELETE http://localhost:4000/logout
+Content-Type: application/json
+
+{
+    "token" : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQW5kaSIsImlhdCI6MTU3MjkxMTQ4MX0.BXI3jrRMM2EU_WUuBvD1bgzpUau9K4uior3kmxzDLKw"
+}
 
 ###
 
@@ -9,7 +27,3 @@ Content-Type: application/json
 {
     "username": "Andi"
 }
-
-###
-
-GET https://youtu.be/mbsmsi7l3r4?t=1039
