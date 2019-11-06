@@ -1,21 +1,29 @@
-const path = require('path')
-var dotenvPath = path.resolve(process.cwd(), '.env')
-var dotenv = require('dotenv').config({
-    path: dotenvPath
-})
+var dotenv = require('dotenv').config()
 
 if (dotenv.error) {throw dotenv.error}
-
-console.log(dotenv.parsed)
 
 const express = require('express')
 const app = express()
 
+const bcrypt= require('bcrypt')
+const cors = require('cors')
 const jwt = require('jsonwebtoken')
 
 app.use(express.json())
+app.use(cors())
 
 let refreshTokens = []
+
+const USERS = [
+    {
+        name: "Andi",
+        passwd: 'andi'
+    },
+    {
+        name: "Randy",
+        passwd: 'randy'
+    }
+]
 
 app.delete('/logout', (req, res) => {
     refreshTokens = refreshTokens.filter(token => token !== req.body.token)
@@ -41,10 +49,17 @@ app.post('/login', (req, res) => {
     // Authenticate User
 
     const username = req.body.username
+    const rawpasswd = req.body.passwd
+
+    var loginuser = USERS.filter(item => item.name == username).pop()
+    loginpasswd = loginuser && loginuser.passwd || ''
+    if(loginpasswd  != rawpasswd) {
+        return res.sendStatus(403)
+    }
+
     const user = {
         name: username
     }
-
     const accessToken = generateAccessToken(user)
     const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET)
     refreshTokens.push(refreshToken)
@@ -55,9 +70,7 @@ app.post('/login', (req, res) => {
 })
 
 function generateAccessToken(user) {
-    return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '15s' })
+    return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '5min' })
 }
 
 app.listen(4000)
-
-// https://youtu.be/mbsmsi7l3r4?t=1039

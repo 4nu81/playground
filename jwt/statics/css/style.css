@@ -1,0 +1,21 @@
+body {
+    font-family: Roboto, sans-serif;
+    color: #0aa;
+    background-color: rgb(5,5,5);
+    margin:10px;
+    box-sizing: content-box;
+}
+header {
+    margin: 5px;
+    padding: 20px;
+    background: #222222;
+}
+header * {
+    margin-right: 10px;
+}
+header span {
+    padding: 5px;
+    margin: 5px 10px 5px 5px;
+    color: rgb(5,5,5);
+    background: #a0a;
+}
