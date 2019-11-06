@@ -20,7 +20,17 @@ const posts = [
         username: 'Randy',
         title: 'Post 2',
         text: 'Exercitation nulla labore aliqua occaecat consectetur minim Lorem. Velit labore anim eu amet minim exercitation sunt proident consectetur officia dolor. Occaecat aute fugiat culpa nostrud eiusmod. Consequat veniam non aliquip nostrud adipisicing. Dolor veniam cillum Lorem fugiat consequat velit culpa quis ea. Dolore velit mollit ipsum tempor esse dolor voluptate.'
-    }
+    },
+    {
+        username: 'Andi',
+        title: 'Post 3',
+        text: 'Veniam aliquip irure nulla laboris fugiat tempor veniam laborum nisi est magna irure culpa fugiat. Quis esse aute est pariatur incididunt dolor id occaecat eiusmod veniam officia magna reprehenderit cillum. Dolore pariatur labore magna aliqua. Dolor consequat est laboris ea. Nostrud eu eu deserunt sint reprehenderit sunt reprehenderit eiusmod excepteur deserunt sit. Minim sunt laboris elit aute. Consequat amet nisi enim do elit.'
+    },
+    {
+        username: 'Andi',
+        title: 'Post 4',
+        text: 'Veniam aliquip irure nulla laboris fugiat tempor veniam laborum nisi est magna irure culpa fugiat. Quis esse aute est pariatur incididunt dolor id occaecat eiusmod veniam officia magna reprehenderit cillum. Dolore pariatur labore magna aliqua. Dolor consequat est laboris ea. Nostrud eu eu deserunt sint reprehenderit sunt reprehenderit eiusmod excepteur deserunt sit. Minim sunt laboris elit aute. Consequat amet nisi enim do elit.'
+    },
 ]
 
 // ########## JWT Auth nicht nötig ##########
@@ -35,7 +45,7 @@ app.get('/posts', authenticateToken, (req, res) => {
     // res.json(posts.filter(post=> post.username == req.user.name))
     res.render('posts.ejs', {
         name: req.user.name,
-        posts: posts.filter(post=> post.username == req.user.name)
+        posts: posts//.filter(post=> post.username == req.user.name)
     })
 })
 

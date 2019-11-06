@@ -36,8 +36,11 @@ function login () {
     const url= "http://localhost:4000/login";
 
     var req = new XMLHttpRequest();
+    req.withCredentials = true;
     req.onreadystatechange = function(){
         if (req.readyState === 4 && req.status === 200){
+            var cookie = req.getResponseHeader('Set-Cookie');
+            console.log('cookie:',cookie)
             res = JSON.parse(this.responseText);
             var accessToken = res.accessToken;
             var refreshToken = res.refreshToken;

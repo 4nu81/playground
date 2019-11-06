@@ -10,7 +10,19 @@ const cors = require('cors')
 const jwt = require('jsonwebtoken')
 
 app.use(express.json())
-app.use(cors())
+
+var whitelist = ['http://localhost:3000', 'http://localhost:4000']
+var corsOptions = {
+    credentials: true,
+    origin: function (origin, callback) {
+        if (whitelist.indexOf(origin) !== -1) {
+            callback(null, true)
+        } else {
+            callback(new Error('Not allowed by CORS'))
+        }
+    }
+}
+app.use(cors(corsOptions))
 
 let refreshTokens = []
 
@@ -63,6 +75,7 @@ app.post('/login', (req, res) => {
     const accessToken = generateAccessToken(user)
     const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET)
     refreshTokens.push(refreshToken)
+    res.cookie('accessToken',accessToken, { maxAge: 900 });
     res.json({
         accessToken: accessToken,
         refreshToken: refreshToken
