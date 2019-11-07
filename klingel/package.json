@@ -1,0 +1,17 @@
+{
+  "name": "klingel",
+  "version": "1.0.0",
+  "description": "Haustürklingel",
+  "main": "klingel.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "a.nubi",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "express-static": "^1.2.6",
+    "web-push": "^3.3.3"
+  }
+}
