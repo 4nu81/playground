@@ -2,8 +2,12 @@ GET http://localhost:3000/
 
 ###
 
+GET http://localhost:3000/css/%2e%2e/%2d%2e/authServer.js
+
+###
+
 GET http://localhost:3000/posts
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQW5kaSIsImlhdCI6MTU3MzA0NzkxMCwiZXhwIjoxNTczMDQ4MjEwfQ.X3ZkFft5Ogkml-5d3l8hiOSQ8Y0ezpZatxlznkjKwT4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQW5kaSIsImlhdCI6MTU3MzQ2NTAyNywiZXhwIjoxNTczNDY1MzI3fQ.MQUgANHSz7rnfqQ6Ocsmn1SpVCJHqNlb4AMDVDFPJoA
 
 ###
 
@@ -29,5 +33,6 @@ POST http://localhost:4000/login
 Content-Type: application/json
 
 {
-    "username": "Andi"
+    "username": "Andi",
+    "passwd": "andi"
 }
