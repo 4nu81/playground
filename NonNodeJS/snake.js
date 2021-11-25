@@ -46,6 +46,9 @@ function drawGame() {
         ctx.fillRect(trail[i].x*gs,(trail[i].y + 2 )*gs,gs-2,gs-2);
     }
 
+    ctx.fillStyle="blue";
+        ctx.fillRect(px*gs,(py + 2 )*gs,gs-2,gs-2);
+
     ctx.fillStyle="red";
     ctx.fillRect(ax*gs,(ay+2)*gs,gs-2,gs-2);
 
