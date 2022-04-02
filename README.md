@@ -1,8 +1,4 @@
 # playground
 
-Let's play
 
-```mermaid
-flowchart
-  A --> B
-```
+[mermaid](markdown/mermaid.md)
