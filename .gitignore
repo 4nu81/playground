@@ -1,3 +1,4 @@
 node_modules/
 datascience/node/node_modules
 python/.env
+*.ignore
