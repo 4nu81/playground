@@ -4,4 +4,4 @@
 [mermaid] example integration
 
 
-[mermaid]:markdown/mermaid.md:
+[mermaid]:markdown/mermaid.md
