@@ -4,3 +4,4 @@ python/.env
 *.ignore
 python/certs
 python/mails.csv
+python/feather/large.feather
