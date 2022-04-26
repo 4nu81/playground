@@ -5,3 +5,4 @@ python/.env
 python/certs
 python/mails.csv
 python/feather/large.feather
+python/feather/large.csv
