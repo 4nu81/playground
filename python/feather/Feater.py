@@ -4,11 +4,11 @@ from time import time
 import numpy as np
 import pandas as pd
 
-import feather
+# import feather #is already used by pd.DataFrame
 
 
 def data_frame():
-    size = 10000000
+    size = 100000
     df = pd.DataFrame({
         'a' : np.random.rand(size),
         'b' : np.random.rand(size),
@@ -34,7 +34,7 @@ def read_from_csv() -> pd.DataFrame:
 def main():
     duration_feather = 0
     duration_csv = 0
-    runs = 2
+    runs = 10
     for _ in range(runs):
         df = data_frame()
         start = timeit.default_timer()
